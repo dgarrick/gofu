@@ -43,19 +43,39 @@ func Eval(ir *InternRep) {
 	if ir.toks == nil {
 		return
 	}
-	state := newState(30000) //according to Wikipedia, this is the "classic" size
+	state := newState(10) //according to Wikipedia, this is the "classic" size
 	loopCount := -1
+	loopIdx := -1
+	var loopStack []int
+	loopStack = append(loopStack, 0)
 	for i := 0; i < len(ir.toks); i++ {
 		cur := ir.toks[i]
 		evalTok(cur, &state)
 		if cur == '[' {
 			loopCount++
+			//FIXME we can't reliably reset the outermost loop
+			if loopCount >= len(ir.loops) {
+				loopCount = 0
+			}
+			loopIdx = loopCount
+			//if this is our first time in the loop, add it to the stack
+			if loopStack[len(loopStack)-1] != loopIdx {
+				loopStack = append(loopStack, loopCount)
+				fmt.Println(loopStack)
+			}
 			if state.data[state.point] == 0 {
-				i = ir.loops[loopCount].end
+				i = ir.loops[loopIdx].end - 1
 			}
 		} else if cur == ']' {
-			i = ir.loops[loopCount].start - 1
-			loopCount--
+			//FIXME this is broken. We need to keep track of how many loops we've seen
+			//and which index in the Loop we're currently in.
+			if state.data[state.point] != 0 {
+				i = ir.loops[loopIdx].start - 1
+				loopCount--
+			} else {
+				loopStack = loopStack[:len(loopStack)-1]
+				loopIdx = loopStack[len(loopStack)-1]
+			}
 		}
 	}
 	fmt.Println()

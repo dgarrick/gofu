@@ -5,7 +5,15 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sort"
 )
+
+// AxisSorter sorts planets by axis.
+type loopSorter []Loop
+
+func (a loopSorter) Len() int           { return len(a) }
+func (a loopSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a loopSorter) Less(i, j int) bool { return a[i].start < a[j].start }
 
 //InternRep is the internal representation of a brainfuck program
 type InternRep struct {
@@ -77,8 +85,9 @@ func Parse(fname string) *InternRep {
 			}
 		}
 	}
-	for _, c := range ir.loops {
-		fmt.Printf("%d\n", c)
+	sort.Sort(loopSorter(ir.loops))
+	for _, i := range ir.loops {
+		fmt.Println(i)
 	}
 	if loopCount != 0 {
 		fmt.Println("Unbalanced brackets!")
