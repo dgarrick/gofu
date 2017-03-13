@@ -5,43 +5,15 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"sort"
 )
 
-// AxisSorter sorts planets by axis.
-type loopSorter []Loop
-
-func (a loopSorter) Len() int           { return len(a) }
-func (a loopSorter) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a loopSorter) Less(i, j int) bool { return a[i].start < a[j].start }
-
-//InternRep is the internal representation of a brainfuck program
-type InternRep struct {
-	toks  []byte
-	loops []Loop
-}
-
-//Loop represents the positions of a paired open and close bracket
-type Loop struct {
-	start int
-	end   int
-}
-
-func newInternRep() *InternRep {
-	var toks []byte
-	var blocks []Loop
-	return &InternRep{toks, blocks}
-}
-
 //Parse parses a filename to a slice of brainfuck tokens
-func Parse(fname string) *InternRep {
+func Parse(fname string) []byte {
 	file, err := os.Open(fname)
 	if err != nil {
 		fmt.Println(err)
 	}
-	ir := newInternRep()
-	var bracks []int
-	isComm := false
+	var toks []byte
 	loopCount := 0
 	charNum := -1
 	r := bufio.NewReader(file)
@@ -54,44 +26,28 @@ func Parse(fname string) *InternRep {
 				return nil
 			}
 		} else {
-			if (cur == '+' ||
+			if cur == '+' ||
 				cur == '-' ||
 				cur == '>' ||
 				cur == '<' ||
 				cur == '.' ||
-				cur == ',') && !isComm {
+				cur == ',' ||
+				cur == '[' ||
+				cur == ']' {
 				charNum++
-				ir.toks = append(ir.toks, cur)
-			} else if cur == '"' {
-				isComm = !isComm
-				break
-			} else if cur == '[' {
+				toks = append(toks, cur)
+			}
+			if cur == '[' {
 				loopCount++
-				charNum++
-				ir.toks = append(ir.toks, cur)
-				bracks = append(bracks, charNum)
-			} else if cur == ']' {
+			}
+			if cur == ']' {
 				loopCount--
-				charNum++
-				ir.toks = append(ir.toks, cur)
-				if ir.toks[bracks[len(bracks)-1]] == '[' {
-					pop := bracks[len(bracks)-1]
-					bracks = bracks[:len(bracks)-1]
-					ir.loops = append(ir.loops, Loop{pop, charNum})
-				} else {
-					fmt.Println("Unbalanced brackets!")
-					return nil
-				}
 			}
 		}
-	}
-	sort.Sort(loopSorter(ir.loops))
-	for _, i := range ir.loops {
-		fmt.Println(i)
 	}
 	if loopCount != 0 {
 		fmt.Println("Unbalanced brackets!")
 		return nil
 	}
-	return ir
+	return toks
 }
