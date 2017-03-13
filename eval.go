@@ -6,7 +6,6 @@ import (
 
 const memsize = 1024
 
-//State encapsulates the Brainfuck program's state
 type state struct {
 	data  []byte
 	point int
@@ -92,5 +91,4 @@ func Eval(toks []byte) {
 			evalTok(cur, &state)
 		}
 	}
-	fmt.Println()
 }
