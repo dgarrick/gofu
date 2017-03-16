@@ -79,7 +79,7 @@ func unloop(i int, cur byte, state *state) int {
 	return i
 }
 
-//Eval evaluates a brainfuck program
+
 func interpret(toks []byte) {
 	state := newState()
 	readIn := bufio.NewReader(os.Stdin)
