@@ -49,18 +49,17 @@ func evalTok(cur byte, state *state, readIn *bufio.Reader) {
 	}
 }
 
-func loop(i int, cur byte, state *state) int {
+func loop(i int, cur byte, toks []byte, state *state) int {
 	if state.data[state.point] == 0 {
-		loopCount := -1
-		for {
+		loopCount := 1
+		for loopCount > 0 {
+			i++
+			cur = toks[i]
 			if cur == '[' {
 				loopCount++
-			} else if cur == ']' && loopCount == 0 {
-				break
 			} else if cur == ']' {
 				loopCount--
 			}
-			i++
 		}
 	} else {
 		//push the bracket on the stack
@@ -85,7 +84,7 @@ func interpret(toks []byte) {
 	for i := 0; i < len(toks); i++ {
 		cur = toks[i]
 		if cur == '[' {
-			i = loop(i, cur, &state)
+			i = loop(i, cur, toks, &state)
 		} else if cur == ']' {
 			i = unloop(i, cur, &state)
 		} else {

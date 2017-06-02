@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-const scriptDir = "./brainfuck_scripts"
+const scriptDir = "./test_scripts"
 
 func TestSimple(t *testing.T) {
 	files, err := ioutil.ReadDir(scriptDir)
