@@ -1,3 +1,4 @@
+This script was written by Alexandru as part of a codegolf challenge (https://codegolf.stackexchange.com/questions/84/interpret-brainfuck)
 compute prime numbers
 to use type the max number then push Alt 1 0
 ===================================================================
